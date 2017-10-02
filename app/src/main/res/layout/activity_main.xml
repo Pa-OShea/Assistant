@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
     android:id="@+id/rel"
     tools:context="com.p14osheagmail.assistant.MainActivity">
 
@@ -13,7 +11,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/microphoneButton"
         android:src="@drawable/ic_mic_white_clear_48dp"
-        android:background="@null"
+        android:contentDescription="micButton"
+        android:background="@drawable/button"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
 

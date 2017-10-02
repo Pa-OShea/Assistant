@@ -2,10 +2,8 @@ package com.p14osheagmail.assistant;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.provider.AlarmClock;
-import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +11,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
+import com.integreight.onesheeld.sdk.OneSheeldConnectionCallback;
+import com.integreight.onesheeld.sdk.OneSheeldDevice;
+import com.integreight.onesheeld.sdk.OneSheeldManager;
+import com.integreight.onesheeld.sdk.OneSheeldScanningCallback;
+import com.integreight.onesheeld.sdk.OneSheeldSdk;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -24,22 +28,63 @@ public class MainActivity extends AppCompatActivity {
 
     private TextToSpeech tts;
 
-    private SharedPreferences preferences;
-    private SharedPreferences.Editor editor;
-    private ArrayList<String> questions;
-    private String name, surname, age, asName;
-    private static final String PREFS = "prefs";
-    private static final String NAME = "name";
-    private static final String AGE = "age";
-    private static final String AS_NAME = "as_name";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        preferences = getSharedPreferences(PREFS,0);
-        editor = preferences.edit();
+
+
+
+        OneSheeldSdk.init(this);
+        OneSheeldSdk.setDebugging(true);
+        OneSheeldManager manager = OneSheeldSdk.getManager();
+        manager.setConnectionRetryCount(1);
+        manager.setAutomaticConnectingRetriesForClassicConnections(true);
+
+//        OneSheeldScanningCallback scanningCallback = new OneSheeldScanningCallback() {
+//            @Override
+//            public void onScanStart() {
+//
+//            }
+//
+//            @Override
+//            public void onDeviceFind(OneSheeldDevice device) {
+//                OneSheeldSdk.getManager().cancelScanning();
+//                device.connect();
+//            }
+//
+//            @Override
+//            public void onScanFinish(List<OneSheeldDevice> foundDevices) {
+//
+//            }
+//        };
+//
+//        OneSheeldConnectionCallback connectionCallback = new OneSheeldConnectionCallback() {
+//            @Override
+//            public void onConnect(OneSheeldDevice device) {
+//                // Output high on pin 13
+//                device.digitalWrite(13,true);
+//
+//                // Read the value of pin 12
+//                boolean isHigh=device.digitalRead(12);
+//            }
+//
+//            @Override
+//            public void onDisconnect(OneSheeldDevice device) {
+//
+//            }
+//
+//            @Override
+//            public void onConnectionRetry(OneSheeldDevice device, int retryCount) {
+//
+//            }
+//        };
+
+//        manager.addConnectionCallback(connectionCallback);
+//        manager.addScanningCallback(scanningCallback);
+//        manager.scan();
 
         findViewById(R.id.microphoneButton).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -47,7 +92,6 @@ public class MainActivity extends AppCompatActivity {
                 listen();
             }
         });
-        loadQuestions();
 
         tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
@@ -64,15 +108,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    private void loadQuestions(){
-        questions = new ArrayList<>();
-        questions.clear();
-        questions.add("Hello, what is your name?");
-        questions.add("What is your surname?");
-        questions.add("How old are you?");
-        questions.add("That's all I had, thank you");
     }
 
     private String whatICanDo(){
@@ -134,22 +169,6 @@ public class MainActivity extends AppCompatActivity {
             speak(whatICanDo());
         }
 
-        if(text.contains("hello")){
-            speak(questions.get(0));
-        }
-        //
-        if(text.contains("my name is")){
-            name = speech[speech.length-1];
-            Log.e("THIS", "" + name);
-            editor.putString(NAME,name).apply();
-            speak(questions.get(2));
-        }
-        //This must be the age
-        if(text.contains("years") && text.contains("old")){
-            String age = speech[speech.length-3];
-            Log.e("THIS", "" + age);
-            editor.putString(AGE, age).apply();
-        }
 
         if(text.contains("what") && text.contains("time")){
             SimpleDateFormat digitalTime = new SimpleDateFormat("HH:mm");
@@ -201,29 +220,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if(text.contains("thank you")){
-            speak("Thank you too " + preferences.getString(NAME, null));
-        }
-
-        if(text.contains("how old am I")){
-            speak("You are "+preferences.getString(AGE,null)+" years old.");
-        }
-
-        if(text.contains("what is your name")){
-            String as_name = preferences.getString(AS_NAME,"");
-            if(as_name.equals(""))
-                speak("How do you want to call me?");
-            else
-                speak("My name is "+as_name);
-        }
-
-       /* if(text.contains("call you")){
-            String name = speech[speech.length-1];
-            editor.putString(AS_NAME,name).apply();
-            speak("I like it, thank you "+preferences.getString(NAME,null));
-        }*/
-
-        if(text.contains("what is my name")){
-            speak("Your name is "+preferences.getString(NAME,null));
+            speak("Thank you too ");
         }
     }
 
